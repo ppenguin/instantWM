@@ -290,7 +290,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 		if (rounded && h > w) {
 			XFillArc(drw->dpy, drw->drawable, drw->gc, x, y + h - w, w, w, 32*360, 360*32);
 		} else {
-			XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
+			//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
 		}
 		d = XftDrawCreate(drw->dpy, drw->drawable,
 		                  DefaultVisual(drw->dpy, drw->screen),

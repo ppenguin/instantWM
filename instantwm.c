@@ -1134,7 +1134,7 @@ drawstatusbar(Monitor *m, int bh, char* stext) {
 
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
 	drw->scheme[ColFg] = scheme[SchemeNorm][ColFg];
-	drw_rect(drw, x, 0, w, bh, 1, 1);
+	//drw_rect(drw, x, 0, w, bh, 1, 1);
 	x++;
 
 	/* process status text */
@@ -1168,7 +1168,7 @@ drawstatusbar(Monitor *m, int bh, char* stext) {
 					while (text[++i] != ',');
 					int rh = atoi(text + ++i);
 
-					drw_rect(drw, rx + x, ry, rw, rh, 1, 0);
+					//drw_rect(drw, rx + x, ry, rw, rh, 1, 0);
 				} else if (text[i] == 'f') {
 					x += atoi(text + ++i);
 				}
@@ -1265,11 +1265,22 @@ drawbar(Monitor *m)
 				if (!ISVISIBLE(c))
 					continue;
 				if (m->sel == c) {
-					XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, 0, bh, bh);
-					XFillRectangle(drw->dpy, drw->drawable, drw->gc, x + (1.0 / (double)n) * w - bh, 0, bh, bh);
+					//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, 0, bh, bh);
+					//XFillRectangle(drw->dpy, drw->drawable, drw->gc, x + (1.0 / (double)n) * w - bh, 0, bh, bh);
 					XSetForeground(drw->dpy, drw->gc, scheme[SchemeSel][ColBg].pixel);
-					XFillArc(drw->dpy, drw->drawable, drw->gc, x, 0, bh, bh, 360*16, 360*32);
-					XFillArc(drw->dpy, drw->drawable, drw->gc, x + (1.0 / (double)n) * w - bh, 0, bh, bh, 360*48, 360*32);
+					//XFillArc(drw->dpy, drw->drawable, drw->gc, x, 10, bh, bh, 360*16, 360*32);
+					//XFillArc(drw->dpy, drw->drawable, drw->gc, x + (1.0 / (double)n) * w - bh, 0, bh, bh, 360*48, 360*32);
+					fprintf(stderr, "hello there %d", drw->w);
+					cairo_surface_t* surface=cairo_xlib_surface_create(drw->dpy, 
+						drw->drawable,DefaultVisual(drw->dpy, drw->screen), w,bh);
+					
+					cairo_t* cr=cairo_create(surface);
+					cairo_set_source_rgb (cr, 1.0, 1.0, 0.0);
+					cairo_paint_with_alpha (cr, 0.1);
+
+					cairo_surface_flush(surface);
+
+
 					drw_setscheme(drw, scheme[SchemeSel]);
 					if (TEXTW(c->name) < (1.0 / (double)n) * w - bh){
 						drw_text(drw, x + 0.5 * bh, 0, (1.0 / (double)n) * w - bh + 2, bh, ((1.0 / (double)n) * w - bh - TEXTW(c->name)) * 0.5, c->name, 0, 0);
@@ -1298,7 +1309,7 @@ drawbar(Monitor *m)
 			}
 		} else {
 			drw_setscheme(drw, scheme[SchemeNorm]);
-			drw_rect(drw, x, 0, w, bh, 1, 1);
+			//drw_rect(drw, x, 0, w, bh, 1, 1);
 		}
 
 	}
