@@ -407,6 +407,7 @@ static Key keys[] = {
 	{0, XF86XK_AudioPause, spawn, {.v = playerpause}},
 	{0, XF86XK_AudioNext, spawn, {.v = playernext}},
 	{0, XF86XK_AudioPrev, spawn, {.v = playerprevious}},
+	{0, XF86XK_HomePage, spawn, {.v = firefoxcmd}},
 
 	{MODKEY|ShiftMask, XK_Print, spawn, {.v = fscrotcmd}},
 	{MODKEY, XK_Print, spawn, {.v = scrotcmd}},
@@ -451,7 +452,7 @@ static Button buttons[] = {
 	{ ClkStatusText,        MODKEY,         Button4,        spawn,          {.v = upbright } },
 	{ ClkStatusText,        MODKEY,         Button5,        spawn,          {.v = downbright } },
 	{ ClkRootWin,           MODKEY,         Button3,        spawn,          {.v = notifycmd } },
-	{ ClkRootWin,           0,              Button1,        spawn,          {.v = panther } },
+	// { ClkRootWin,           0,              Button1,        spawn,          {.v = panther } },
 	{ ClkRootWin,           MODKEY,         Button1,        setoverlay,     {0} },
 	{ ClkRootWin,           0,              Button3,        spawn,          {.v = smartcmd } },
 	{ ClkRootWin,           0,              Button5,        showoverlay,          {0} },
