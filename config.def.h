@@ -100,6 +100,9 @@ static const Rule rules[] = {
 	{"org-wellkord-globonote-Main", NULL,     NULL,        0,            1,           -1},
 	{"Peek", NULL,     NULL,        0,            1,           -1},
 	{"ROX-Filer", NULL,     NULL,        0,            0,           -1},
+	{"qjackctl", NULL,     NULL,       0,            1,           -1},
+	{"keepassxc", NULL,     NULL,       0,            1,           -1},
+	{"ardour-6.5.0", NULL,     NULL,       0,            1,           -1},
 };
 
 /* layout(s) */
