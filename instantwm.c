@@ -100,7 +100,7 @@ int specialnext = 0;
 
 Client *animclient;
 
-int commandoffsets[10];
+int commandoffsets[20];
 
 int forceresize = 0;
 Monitor *selmon;
@@ -268,8 +268,8 @@ void changesnap(Client *c, int snapmode) {
 }
 
 void tempfullscreen() {
-    Client *c;
     if (selmon->fullscreen) {
+        Client *c;
         c = selmon->fullscreen;
         if (c->isfloating || NULL == selmon->lt[selmon->sellt]->arrange) {
             restorefloating(c);
@@ -303,7 +303,7 @@ createoverlay() {
 		return;
     if (selmon->sel == selmon->fullscreen)
         tempfullscreen();
-	if (selmon->sel == selmon->overlay) {
+    if (selmon->sel == selmon->overlay) {
 		resetoverlay();
 		for (tm = mons; tm; tm = tm->next) {
 			tm->overlay = NULL;
@@ -327,11 +327,11 @@ createoverlay() {
 	}
 
     if (selmon->overlaymode == 0 || selmon->overlaymode == 2)
-	    selmon->overlay->h =((selmon->wh) / 3);
+        selmon->overlay->h =((selmon->wh) / 3);
     else
         selmon->overlay->w = ((selmon->ww) / 3);
 
-	XRaiseWindow(dpy,tempclient->win);
+    XRaiseWindow(dpy,tempclient->win);
 	showoverlay();
 }
 
@@ -349,8 +349,9 @@ resetoverlay() {
 
 }
 
-double easeOutQuint( double t ) {
-    return 1 + (--t) * t * t;
+double easeOutCubic( double t ) {
+    t--;
+    return 1 + t * t * t;
 }
 
 void checkanimate(Client *c, int x, int y, int w, int h, int frames, int resetpos) {
@@ -389,8 +390,8 @@ void animateclient(Client *c, int x, int y, int w, int h, int frames, int resetp
 			while (time < frames)
 			{
 				resize(c,
-					oldx + easeOutQuint(((double)time/frames)) * (x - oldx),
-					oldy + easeOutQuint(((double)time/frames)) * (y - oldy), width, height, 1);
+					oldx + easeOutCubic(((double)time/frames)) * (x - oldx),
+					oldy + easeOutCubic(((double)time/frames)) * (y - oldy), width, height, 1);
 				time++;
 				usleep(15000);
 			}
@@ -485,16 +486,16 @@ showoverlay() {
 
 void
 hideoverlay() {
-	if (!overlayexists() || !selmon->overlaystatus)
-		return;
+    if (!overlayexists() || !selmon->overlaystatus)
+        return;
 
-	Client *c;
+    Client *c;
 	Monitor *m;
 	c = selmon->overlay;
 	c->issticky = 0;
     if (c == selmon->fullscreen)
         tempfullscreen();
-	if (c->islocked) {
+    if (c->islocked) {
         switch (selmon->overlaymode) {
         case 0:
 		    animateclient(c, c->x, 0 - c->h, 0, 0, 15, 0);
@@ -584,8 +585,6 @@ void
 applyrules(Client *c)
 {
 	const char *class, *instance;
-	unsigned int i;
-	const Rule *r;
 	Monitor *m;
 	XClassHint ch = { NULL, NULL };
 
@@ -604,6 +603,8 @@ applyrules(Client *c)
         }
         specialnext = 0;
     } else {
+        unsigned int i;
+        const Rule *r;
         for (i = 0; i < LENGTH(rules); i++) {
             r = &rules[i];
             if ((!r->title || strstr(c->name, r->title))
@@ -749,16 +750,16 @@ arrange(Monitor *m)
 void
 arrangemon(Monitor *m)
 {
-    int tbw;
-	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
-	if (m->lt[m->sellt]->arrange)
-		m->lt[m->sellt]->arrange(m);
+    strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
+    if (m->lt[m->sellt]->arrange)
+        m->lt[m->sellt]->arrange(m);
     else
         floatl(m);
 
-	if (m == selmon)
-		selmon->clientcount = clientcount();
+    if (m == selmon)
+        selmon->clientcount = clientcount();
     if (m->fullscreen) {
+    int tbw;
         tbw = selmon->fullscreen->bw;
         if (m->fullscreen->isfloating)
             savefloating(selmon->fullscreen);
@@ -1285,7 +1286,7 @@ void clickstatus(const Arg *arg) {
 
 int
 drawstatusbar(Monitor *m, int bh, char* stext) {
-	int ret, i, w, x, len, cmdcounter, testi;
+	int ret, i, w, x, len, cmdcounter;
 	short isCode = 0;
 	char *text;
 	char *p;
@@ -1390,7 +1391,6 @@ drawstatusbar(Monitor *m, int bh, char* stext) {
 	while (1) {
 		if (cmdcounter > 19 || (commandoffsets[cmdcounter] == -1) || (commandoffsets[cmdcounter] == 0))
 			break;
-		fprintf(stderr, "testi: %d, ", commandoffsets[cmdcounter]);
 		cmdcounter++;
 	}
 
@@ -1409,7 +1409,7 @@ void
 drawbar(Monitor *m)
 {
 
-	int x, w, sw = 0, n = 0, stw = 0, scm, roundw, iconoffset;
+	int x, w, sw = 0, n = 0, stw = 0, roundw, iconoffset;
     unsigned int i, occ = 0, urg = 0;
 	Client *c;
 
@@ -1559,6 +1559,7 @@ drawbar(Monitor *m)
 				x += (1.0 / (double)n) * w;
 
 				} else {
+                    int scm;
 					if (HIDDEN(c)) {
 						scm = SchemeHid;
 					} else{
@@ -1992,22 +1993,18 @@ int startswith(const char *a, const char *b)
 }
 
 int
-xcommand(void)
+xcommand()
 {
 	char command[256];
     char *fcursor;
     char *indicator="c;:;";
-	char str_signum[16];
-	int i, v, signum, argnum;
-	size_t len_command;
+	int i, argnum;
     Arg arg;
 
 	// Get root name property
 	if (!( gettextprop(root, XA_WM_NAME, command, sizeof(command))) ) {
         return 0;
     }
-
-    len_command = strlen(command);
 
     if (startswith(command, indicator)) {
         fcursor = command + 4;
@@ -2274,7 +2271,6 @@ maprequest(XEvent *e)
 void
 motionnotify(XEvent *e)
 {
-	static Monitor *mon = NULL;
 	Monitor *m;
 	Client *c;
 	XMotionEvent *ev = &e->xmotion;
@@ -3147,8 +3143,6 @@ void drawwindow(const Arg *arg) {
 		fprintf(stderr, "errror %s", strout);
 	}
 	memset(tmpstring,0,strlen(tmpstring));
-
-	counter = 0;
 }
 
 // drag the green tag mark to another tag
@@ -3311,7 +3305,6 @@ recttomon(int x, int y, int w, int h)
 {
 	Monitor *m, *r = selmon;
 	int a, area = 0;
-
 	for (m = mons; m; m = m->next)
 		if ((a = INTERSECT(x, y, w, h, m)) > area) {
 			area = a;
@@ -3700,11 +3693,12 @@ runAutostart(void) {
 void
 scan(void)
 {
-	unsigned int i, num;
+	unsigned int num;
 	Window d1, d2, *wins = NULL;
 	XWindowAttributes wa;
 
 	if (XQueryTree(dpy, root, &d1, &d2, &wins, &num)) {
+        unsigned int i;
 		for (i = 0; i < num; i++) {
 			if (!XGetWindowAttributes(dpy, wins[i], &wa)
 			|| wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
@@ -4179,7 +4173,7 @@ tagall(const Arg *arg)
 		return;
 	if (selmon->sel && ui & TAGMASK) {
 		for(c = selmon->clients; c; c = c->next) {
-			if (!(c->tags & 1 << selmon->pertag->curtag - 1))
+			if (!(c->tags & 1 << (selmon->pertag->curtag - 1)))
 				continue;
 			if (c->tags == 1 << 20)
 				c->issticky = 0;
@@ -4223,7 +4217,7 @@ void resetsticky(Client *c) {
 	if (!c->issticky)
 		return;
 	c->issticky = 0;
-	c->tags = 1 << selmon->pertag->curtag -1;
+	c->tags = 1 << (selmon->pertag->curtag -1);
 }
 
 void
@@ -4702,6 +4696,7 @@ toggletag(const Arg *arg)
 void togglescratchpad(const Arg *arg) {
 	Client *c;
     Client *activescratchpad;
+    activescratchpad = NULL;
     int scratchexists;
     scratchexists = 0;
 	if (&overviewlayout == selmon->lt[selmon->sellt]->arrange) {
@@ -5371,9 +5366,7 @@ moveleft(const Arg *arg) {
 void
 animleft(const Arg *arg) {
 
-	Client *c;
 	Client *tempc;
-	int tmpcounter = 0;
 
 	// windows like behaviour in floating layout
 	if (selmon->sel && NULL == selmon->lt[selmon->sellt]->arrange) {
@@ -5386,8 +5379,9 @@ animleft(const Arg *arg) {
 		return;
 
 	if (animated) {
+	int tmpcounter = 0;
 		for(tempc = selmon->clients; tempc; tempc = tempc->next) {
-			if (tempc->tags & 1 << selmon->pertag->curtag - 2 && !tempc->isfloating && selmon->pertag &&
+			if (tempc->tags & 1 << (selmon->pertag->curtag - 2) && !tempc->isfloating && selmon->pertag &&
 				selmon->pertag->ltidxs[selmon->pertag->curtag - 1][0]->arrange != NULL) {
 				if (!tmpcounter) {
 					tmpcounter = 1;
@@ -5403,7 +5397,6 @@ animleft(const Arg *arg) {
 void
 animright(const Arg *arg) {
 
-	Client *c;
 	Client *tempc;
 	int tmpcounter = 0;
 
@@ -5858,23 +5851,21 @@ systraytomon(Monitor *m) {
 	return t;
 }
 
-void
-zoom(const Arg *arg)
-{
-	Client *c = selmon->sel;
-	if(!c)
-		return;
+void zoom(const Arg *arg) {
+  Client *c = selmon->sel;
 
-	XRaiseWindow(dpy, c->win);
-	if (!selmon->lt[selmon->sellt]->arrange
-	|| (selmon->sel && selmon->sel->isfloating))
-		return;
-	if (c == nexttiled(selmon->clients))
-		if (!c || !(c = nexttiled(c->next)))
-			return;
-	pop(c);
+  if (!c)
+    return;
+
+  XRaiseWindow(dpy, c->win);
+
+  if ((!selmon->lt[selmon->sellt]->arrange ||
+       (selmon->sel && selmon->sel->isfloating)) ||
+      (c == nexttiled(selmon->clients) && (!c || !(c = nexttiled(c->next))))) {
+    return;
+  }
+  pop(c);
 }
-
 
 void
 resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst)
